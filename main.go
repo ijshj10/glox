@@ -1,13 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 
 	"github.com/ijshj10/glox/lex"
 )
-
-var hadError bool
 
 func main() {
 	if len(os.Args) == 1 {
@@ -21,20 +20,25 @@ func main() {
 
 func runPrompt() {
 	var input string
+	stdinReader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
-		_, err := fmt.Scanln(&input)
-		if err != nil {
-			return
+		_, in_err := stdinReader.Read()
+		if in_err != nil {
+			fmt.Println(in_err)
+			continue
 		}
-		run([]byte(input))
+		err := run([]byte(input))
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
 func runFile(filename string) {
 	text, err := os.ReadFile(filename)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err)
 		return
 	}
 	run(text)
@@ -43,16 +47,7 @@ func runFile(filename string) {
 func run(text []byte) error {
 	tokens, err := lex.Lex(text)
 	for _, token := range tokens {
-		fmt.Println(token)
+		fmt.Println(token.Type, string(token.Lexeme))
 	}
 	return err
-}
-
-func errorAt(line int, err error) {
-	report(line, "", err)
-}
-
-func report(line int, where string, err error) {
-	println(fmt.Sprintf("[line %d] Error %s: %s", line, where, err.Error()))
-	hadError = true
 }
