@@ -3,7 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/ijshj10/glox/lex"
 )
+
+var hadError bool
 
 func main() {
 	if len(os.Args) == 1 {
@@ -37,20 +41,18 @@ func runFile(filename string) {
 }
 
 func run(text []byte) error {
-	tokens, err := Lex(text)
+	tokens, err := lex.Lex(text)
 	for _, token := range tokens {
 		fmt.Println(token)
 	}
 	return err
 }
 
-type Type string
-
-type Token struct {
-	Type   Type
-	lexeme []byte
+func errorAt(line int, err error) {
+	report(line, "", err)
 }
 
-func Lex(text []byte) ([]Token, error) {
-	return nil, nil
+func report(line int, where string, err error) {
+	println(fmt.Sprintf("[line %d] Error %s: %s", line, where, err.Error()))
+	hadError = true
 }
